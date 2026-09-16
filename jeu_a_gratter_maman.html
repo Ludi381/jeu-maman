@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0,user-scalable=no">
+<title>Jeu à gratter — Maman</title>
+<style>
+*{box-sizing:border-box}
+html,body{margin:0;min-height:100%;font-family:Arial,sans-serif;background:linear-gradient(135deg,#fff1f5,#ffe3ec);display:flex;align-items:center;justify-content:center}
+body{padding:24px}
+.card{width:min(92vw,430px);background:white;border-radius:28px;padding:28px 22px 30px;text-align:center;box-shadow:0 18px 50px #0002}
+h1{margin:0 0 8px;font-size:28px;color:#8d3655}
+.sub{margin:0 0 22px;color:#777}
+.ticket{position:relative;border-radius:20px;overflow:hidden;background:#fff8fb;border:2px dashed #d99ab0;padding:26px 18px;min-height:300px;display:flex;align-items:center;justify-content:center}
+.message{font-size:22px;line-height:1.45;color:#8d3655;font-weight:700}
+.small{display:block;margin-top:14px;font-size:16px;font-weight:400;color:#6d5960}
+canvas{position:absolute;inset:0;width:100%;height:100%;touch-action:none;cursor:crosshair}
+.hint{margin:18px 0 0;color:#777;font-size:14px}
+button{margin-top:18px;border:0;border-radius:999px;padding:12px 20px;background:#8d3655;color:#fff;font-size:15px;cursor:pointer}
+</style>
+</head>
+<body>
+<div class="card">
+  <h1>🎁 Une petite surprise pour toi</h1>
+  <p class="sub">Gratte la zone avec ton doigt ou ta souris ✨</p>
+  <div class="ticket" id="ticket">
+    <div class="message">
+      🎂 Joyeux anniversaire Maman ! 💕
+      <span class="small">Bon cadeau pour aller au restaurant avec ta fille préférée 🥰</span>
+    </div>
+    <canvas id="scratch"></canvas>
+  </div>
+  <p class="hint">Continue à gratter pour découvrir tout le message !</p>
+  <button onclick="location.reload()">Recommencer</button>
+</div>
+<script>
+const canvas=document.getElementById('scratch'), ticket=document.getElementById('ticket');
+const ctx=canvas.getContext('2d');
+let drawing=false;
+function resize(){
+ const r=ticket.getBoundingClientRect(), d=devicePixelRatio||1;
+ canvas.width=r.width*d; canvas.height=r.height*d;
+ canvas.style.width=r.width+'px'; canvas.style.height=r.height+'px';
+ ctx.setTransform(d,0,0,d,0,0);
+ ctx.fillStyle='#b9b9b9'; ctx.fillRect(0,0,r.width,r.height);
+ ctx.fillStyle='#8f8f8f'; ctx.font='bold 24px Arial'; ctx.textAlign='center';
+ ctx.fillText('GRATTE ICI ✨',r.width/2,r.height/2);
+ ctx.font='14px Arial'; ctx.fillText('avec ton doigt',r.width/2,r.height/2+28);
+}
+function point(e){
+ const r=canvas.getBoundingClientRect();
+ return {x:(e.clientX-r.left),y:(e.clientY-r.top)};
+}
+function scratch(e){
+ if(!drawing)return;
+ const p=point(e); ctx.globalCompositeOperation='destination-out';
+ ctx.beginPath();ctx.arc(p.x,p.y,25,0,Math.PI*2);ctx.fill();
+}
+canvas.addEventListener('pointerdown',e=>{drawing=true;canvas.setPointerCapture(e.pointerId);scratch(e)});
+canvas.addEventListener('pointermove',scratch);
+canvas.addEventListener('pointerup',()=>drawing=false);
+canvas.addEventListener('pointercancel',()=>drawing=false);
+window.addEventListener('resize',resize); resize();
+</script>
+</body>
+</html>
